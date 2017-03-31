@@ -45,7 +45,7 @@ int main(int argc, char *argv[]){
         cerr<<"No input specified, using input 1"<<endl;
         INPUT_FILE = 1;
     }
-    if (argc == 2){
+    if (argc >= 2){
         int z = atoi(argv[1]);
         if (z == 0 && strlen(argv[1]) == 1){
             cerr<<"You specified 0 as first arg, but input numbers are from 1 to 4.. Idiot.\nUsing input 1, just for this time"<<endl;
@@ -85,9 +85,9 @@ int main(int argc, char *argv[]){
             cerr<<"Look, i dunno how you get there, ask someone.";
             return 1;
     }
-    
     int param = 0;
-    scanf("%d", &param);
+    if (argc >= 3) param = atoi(argv[2]);
+    
     cout<<"Got parameter"<<param<<endl;
     
     freopen(FILE_IN.c_str(),"r",stdin);
