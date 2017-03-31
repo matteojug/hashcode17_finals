@@ -42,7 +42,7 @@ string FILE_IN, FILE_OUT;
 int main(int argc, char *argv[]){
     int INPUT_FILE = -1;
     if (argc == 1){
-        cerr<<"No input specified, using input 1"<<endl;
+        cerr<<"No input specified, using input 1.\n FIY, you should run "<<argv[0]<<" [(1|2|3|4|input_name) [param1 [param2 ... ]]]"<<endl;
         INPUT_FILE = 1;
     }
     if (argc >= 2){
