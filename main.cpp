@@ -19,6 +19,7 @@
 #include <sstream>
 #include <iostream>
 #include <algorithm>
+#include <unordered_map>
 
 using namespace std;
 
@@ -32,6 +33,7 @@ typedef vector<ii> vii;
 #define ss second
 #define mp make_pair
 #define pb push_back
+#define mt make_tuple
 
 #define MAXN 1000000
 
@@ -94,6 +96,21 @@ int main(int argc, char *argv[]){
     
     int a;
     scanf("%d", &a);
+    
+    vector<tuple<int, int, string> > v;
+    v.pb(mt(1,2,"pippo"));
+    v.pb(mt(4,6,"pappa"));
+    v.pb(mt(2,-1,"jbfkjbgs"));
+    sort(v.begin(), v.end());
+    for (auto x : v)
+        cout<<get<0>(x)<<","<<get<1>(x)<<","<<get<2>(x)<<endl;
+        
+    bitset<10> bs;
+    bs[0] = 1;
+    bs[2] = 1;
+    bs[9] = 1;
+    cout<<bs.to_string()<<endl;
+    
     cout<<"Now i'll print the score (a+param**2)"<<endl;
     cout<<a+param*param<<endl;
     
