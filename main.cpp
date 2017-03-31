@@ -111,8 +111,8 @@ int main(int argc, char *argv[]){
     bs[9] = 1;
     cout<<bs.to_string()<<endl;
     
-    cout<<"Now i'll print the score (a+param**2)"<<endl;
-    cout<<a+param*param<<endl;
+    cout<<"Now i'll print the score (a+param**2) and the fileout"<<endl;
+    cout<<FILE_OUT<<" "<<a+param*param<<endl;
     
     freopen(FILE_OUT.c_str(),"w",stdout);
     cout<<"Here print the solution"<<endl;
