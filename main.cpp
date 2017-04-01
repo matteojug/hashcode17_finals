@@ -20,6 +20,7 @@
 #include <iostream>
 #include <algorithm>
 #include <unordered_map>
+#include <random>
 
 using namespace std;
 
@@ -50,8 +51,11 @@ bool BACKBONE_TMP[MAXN][MAXN];
 int BACKBONE_COST[MAXN][MAXN];
 bool COVERED[MAXN][MAXN];
 bool ROUTER[MAXN][MAXN];
+bool RECT_COVERED[MAXN][MAXN];
+ii RECT_CHAMPION[MAXN][MAXN];
+ll SCORES[MAXN][MAXN];
 
-int DELTA_SKIP = 5;
+int DELTA_SKIP = 1;
 
 void quick_calc_backcost(queue<ii> &q){
     while (!q.empty()){
@@ -81,30 +85,68 @@ void calc_backcost(){
 int theres_a_wall(int a, int b, int c, int d){
     return PLANE_WALL[c][d]-(a>0?PLANE_WALL[a-1][d]:0)-(b>0?PLANE_WALL[c][b-1]:0)+(a>0&&b>0?PLANE_WALL[a-1][b-1]:0);
 }
-priority_queue<pair<ll, ii> > pq;
-void calc_scores(){
-    while (!pq.empty()) pq.pop();
-    pair<ll, ii> best = mp(-B, mp(0,0));
-    for (int i = 0; i < H; i+=DELTA_SKIP)
-        for (int j = 0; j < W; j+=DELTA_SKIP){
-            if (ROUTER[i][j] || PLANE[i][j] == '#') continue;
+void calc_champions(){
+    for (int i = 0; i < H; i++)
+        for (int j = 0; j < W; j++){
+            int ic = i, jc = j;
+            if (ROUTER[ic][jc] || PLANE[ic][jc] == '#') continue;
             ll score = 0;
             for (int a = -R; a <= R; a++)
                 for (int b = -R; b <= R; b++)
-                    if (i+a >= 0 && i+a < H && j+b >= 0 && j+b < W){
-                        if (COVERED[i+a][j+b] || PLANE[i+a][b+j] != '.') continue;
-                        if (!theres_a_wall(min(i+a,i),min(j+b,j),max(i+a,i),max(j+b,j)))
+                    if (ic+a >= 0 && ic+a < H && jc+b >= 0 && jc+b < W){
+                        if (COVERED[ic+a][jc+b] || PLANE[ic+a][b+jc] != '.') continue;
+                        if (!theres_a_wall(min(ic+a,ic),min(jc+b,jc),max(ic+a,ic),max(jc+b,jc)))
                             score += 1000;
                     }
-            if (BB-(BACKBONE_COST[i][j]*C_B+C_R) < 0) continue;
-            score-=BACKBONE_COST[i][j]*C_B+C_R;
-            if (score > best.ff)
-                best = mp(score,mp(i,j));
-            //~ pq.push(mp(score-(BACKBONE_COST[i][j]*C_B+C_R),mp(i,j)));
+            if (BB-(BACKBONE_COST[ic][jc]*C_B+C_R) < 0) continue;
+            score-=BACKBONE_COST[ic][jc]*C_B+C_R;
+            SCORES[ic][jc] = score;
         }
-    pq.push(best);
+    for (int i = 0; i < H; i+=DELTA_SKIP)
+        for (int j = 0; j < W; j+=DELTA_SKIP){
+            RECT_CHAMPION[i][j] = mp(i,j);
+            for (int a = 0; a < DELTA_SKIP; a++)
+                for (int b = 0; b < DELTA_SKIP; b++)
+                    if (i+a < H && j+b < W && SCORES[i+a][j+b] > SCORES[RECT_CHAMPION[i][j].ff][RECT_CHAMPION[i][j].ss])
+                        RECT_CHAMPION[i][j] = mp(i+a,j+b);
+        }
+    
+}
+
+pair<ll, ii> calc_scores(){
+    ll best = -B;
+    vii besters;
+    besters.pb(mp(0,0));
+    for (int i = 0; i < H; i+=DELTA_SKIP)
+        for (int j = 0; j < W; j+=DELTA_SKIP){
+            int ic = i, jc = j;
+            if (RECT_COVERED[i][j]) continue;
+            ic = RECT_CHAMPION[i][j].ff;
+            jc = RECT_CHAMPION[i][j].ss;
+            if (ROUTER[ic][jc] || PLANE[ic][jc] == '#') continue;
+            ll score = 0;
+            for (int a = -R; a <= R; a++)
+                for (int b = -R; b <= R; b++)
+                    if (ic+a >= 0 && ic+a < H && jc+b >= 0 && jc+b < W){
+                        if (COVERED[ic+a][jc+b] || PLANE[ic+a][b+jc] != '.') continue;
+                        if (!theres_a_wall(min(ic+a,ic),min(jc+b,jc),max(ic+a,ic),max(jc+b,jc)))
+                            score += 1000;
+                    }
+            if (BB-(BACKBONE_COST[ic][jc]*C_B+C_R) < 0) continue;
+            score-=BACKBONE_COST[ic][jc]*C_B+C_R;
+            if (score > best){
+                besters.clear();
+                besters.pb(mp(ic,jc));
+                best = score;
+            } else if (score == best)
+                besters.pb(mp(ic,jc));
+        }
+    return mp(best, besters[rand()%besters.size()]);
 }
 int main(int argc, char *argv[]){
+    int seed = time(NULL);
+    srand(seed);
+    
     // Input stuff, you should ignore this
     int INPUT_FILE = -1;
     if (argc == 1){
@@ -180,20 +222,24 @@ int main(int argc, char *argv[]){
     
     ll ANS = 0;
     
+    RECT_CHAMPION[0][0] = mp(-1,-1);
+    
     //~ int deb = 0;
     calc_backcost();
+    calc_champions();
+    
     while (true){
         //~ deb++;
         //~ if (deb > 100) break;
         
-        calc_scores();
-        auto x = pq.top(); pq.pop();
+        auto x = calc_scores();
         //~ cout<<x.ff<<":"<<x.ss.ff<<","<<x.ss.ss<<endl;
         if (x.ff <= 0) break;
         
         BB -= BACKBONE_COST[x.ss.ff][x.ss.ss]*C_B+C_R;
         if (BB < 0) break;
         ROUTER[x.ss.ff][x.ss.ss] = 1;
+        RECT_COVERED[x.ss.ff-(x.ss.ff % DELTA_SKIP)][x.ss.ss-(x.ss.ss % DELTA_SKIP)] = 1;
         for (int a = -R; a <= R; a++)
             for (int b = -R; b <= R; b++)
                 if (x.ss.ff+a >= 0 && x.ss.ff+a < H && x.ss.ss+b >= 0 && x.ss.ss+b < W){
@@ -288,7 +334,7 @@ int main(int argc, char *argv[]){
         cerr<<"Dafaq B is negative"<<endl;
         exit(0);
     }
-    cout<<ANS + (B - (rtrcnt * C_R + backcnt * C_B))<<endl;
+    cout<<FILE_OUT<<" "<<ANS + (B - (rtrcnt * C_R + backcnt * C_B))<<endl;
     
     //~ cout<<"Now i'll print the score (a+param**2) and the fileout"<<endl;
     //~ cout<<FILE_OUT<<" "<<a+param*param<<endl;

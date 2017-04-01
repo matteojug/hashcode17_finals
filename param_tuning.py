@@ -34,20 +34,13 @@ def random_params():
     while True:
         a = []
         a.append(1)
-        a.append(random.randint(0, 100))
+        #~ a.append(random.randint(0, 100))
         yield a
 
-#OPT2: WRITE HERE THE DOMAINS OF THE VARIABLES YOU WANT TO TEST
-domains = [
-    [1,2],
-    [3,4],
-    [5,6]
-]
-
 # CHOOSE
-iterator = product(*domains)
+#~ iterator = product(*domains)
 
-#~ iterator = random_params()
+iterator = random_params()
 
 #let's try the combinations
 best_score = -1
