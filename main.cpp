@@ -64,20 +64,20 @@ int main(int argc, char *argv[]){
     }
     switch (INPUT_FILE){
         case 1:
-            FILE_IN = "A.in";
-            FILE_OUT = "A.out";
+            FILE_IN = "charleston_road.in";
+            FILE_OUT = "charleston_road.out";
             break;
         case 2:
-            FILE_IN = "B.in";
-            FILE_OUT = "B.out";
+            FILE_IN = "lets_go_higher.in";
+            FILE_OUT = "lets_go_higher.out";
             break;
         case 3:
-            FILE_IN = "C.in";
-            FILE_OUT = "C.out";
+            FILE_IN = "opera.in";
+            FILE_OUT = "opera.out";
             break;
         case 4:
-            FILE_IN = "D.in";
-            FILE_OUT = "D.out";
+            FILE_IN = "rue_de_londres.in";
+            FILE_OUT = "rue_de_londres.out";
             break;
         case 0:
             FILE_IN = string(argv[1]);
@@ -88,18 +88,17 @@ int main(int argc, char *argv[]){
             return 1;
     }
     // Parameter stuff, for tuning
-    int param = 0;
-    if (argc >= 3) param = atoi(argv[2]);
+    //~ int param = 0;
+    //~ if (argc >= 3) param = atoi(argv[2]);
     
-    cout<<"Got parameter "<<param<<endl;
+    //~ cout<<"Got parameter "<<param<<endl;
     
     // Actual code
     freopen(FILE_IN.c_str(),"r",stdin);
     
-    cout<<"Here do the magic"<<endl;
-    
-    int a;
-    scanf("%d", &a);
+    int H, W, R;
+    int C_B, C_R, B;
+    int 
     
     vector<tuple<int, int, string> > v;
     v.pb(mt(1,2,"pippo"));
