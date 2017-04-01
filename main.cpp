@@ -51,7 +51,7 @@ int BACKBONE_COST[MAXN][MAXN];
 bool COVERED[MAXN][MAXN];
 bool ROUTER[MAXN][MAXN];
 
-int DELTA_SKIP = 1;
+int DELTA_SKIP = 5;
 
 void quick_calc_backcost(queue<ii> &q){
     while (!q.empty()){
@@ -97,8 +97,9 @@ void calc_scores(){
                             score += 1000;
                     }
             if (BB-(BACKBONE_COST[i][j]*C_B+C_R) < 0) continue;
-            if (score-(BACKBONE_COST[i][j]*C_B+C_R) > best.ff)
-                best = mp(score-(BACKBONE_COST[i][j]*C_B+C_R),mp(i,j));
+            score-=BACKBONE_COST[i][j]*C_B+C_R;
+            if (score > best.ff)
+                best = mp(score,mp(i,j));
             //~ pq.push(mp(score-(BACKBONE_COST[i][j]*C_B+C_R),mp(i,j)));
         }
     pq.push(best);
@@ -179,17 +180,24 @@ int main(int argc, char *argv[]){
     
     ll ANS = 0;
     
+    //~ int deb = 0;
     calc_backcost();
     while (true){
+        //~ deb++;
+        //~ if (deb > 100) break;
+        
         calc_scores();
         auto x = pq.top(); pq.pop();
+        //~ cout<<x.ff<<":"<<x.ss.ff<<","<<x.ss.ss<<endl;
+        if (x.ff <= 0) break;
+        
         BB -= BACKBONE_COST[x.ss.ff][x.ss.ss]*C_B+C_R;
         if (BB < 0) break;
         ROUTER[x.ss.ff][x.ss.ss] = 1;
         for (int a = -R; a <= R; a++)
             for (int b = -R; b <= R; b++)
                 if (x.ss.ff+a >= 0 && x.ss.ff+a < H && x.ss.ss+b >= 0 && x.ss.ss+b < W){
-                    if (COVERED[x.ss.ff+a][x.ss.ss+b]) continue;
+                    if (COVERED[x.ss.ff+a][x.ss.ss+b] || PLANE[x.ss.ff+a][x.ss.ss+b] != '.') continue;
                     if (!theres_a_wall(min(x.ss.ff+a,x.ss.ff),min(x.ss.ss+b,x.ss.ss),max(x.ss.ff+a,x.ss.ff),max(x.ss.ss+b,x.ss.ss)))
                         ANS += 1000;
                         COVERED[x.ss.ff+a][x.ss.ss+b] = 1;
@@ -293,6 +301,8 @@ int main(int argc, char *argv[]){
             //~ if (ROUTER[i][j]) PLANE_TMP[i][j] = 'O';
         //~ }
     //~ PLANE_TMP[backinit[0]][backinit[1]] = 'X';
+    //~ for (int i = 0; i < H; i++)
+        //~ cout<<PLANE_TMP[i]<<endl;
     
     // Solution printing
     freopen(FILE_OUT.c_str(),"w",stdout);
