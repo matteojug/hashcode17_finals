@@ -55,7 +55,30 @@ bool RECT_COVERED[MAXN][MAXN];
 ii RECT_CHAMPION[MAXN][MAXN];
 ll SCORES[MAXN][MAXN];
 
-int DELTA_SKIP = 1;
+int backinit[2];
+    
+int DELTA_SKIP = 5;
+
+int u_P[MAXN], u_R[MAXN];
+void u_init(){
+    for (int i = 0; i < MAXN; i++) u_P[i] = i, u_R[i] = 0;
+}
+int u_parent(int i){
+    return (u_P[i] == i ? i : u_P[i] = u_parent(u_P[i]));
+}
+int u_same(int a, int b){
+    return u_parent(a) == u_parent(b);
+}
+void u_join(int a, int b){
+    a = u_parent(a);
+    b = u_parent(b);
+    if (u_R[a] > u_R[b])
+        u_P[b] = a;
+    else {
+        u_P[a] = b;
+        if (u_R[a] == u_R[b]) u_R[b]++;
+    }
+}
 
 void quick_calc_backcost(queue<ii> &q){
     while (!q.empty()){
@@ -142,6 +165,84 @@ pair<ll, ii> calc_scores(){
                 besters.pb(mp(ic,jc));
         }
     return mp(best, besters[rand()%besters.size()]);
+    //~ return mp(best, besters[0]);
+}
+void fix_backbone(){
+    vii pts;
+    
+    memset(BACKBONE, 0, sizeof BACKBONE);
+    for (int i = 0; i < H; i++)
+        for (int j = 0; j < W; j++){
+            if (!ROUTER[i][j]) continue;
+            pts.pb(mp(i,j));
+            BACKBONE[i][j] = 1;
+    }
+    pts.pb(mp(backinit[0], backinit[1]));
+    BACKBONE[backinit[0]][backinit[1]] = 1;
+    
+    vector<pair<int, ii> > edges;
+    for (int i = 0; i < pts.size(); i++)
+        for (int j = i+1; j < pts.size(); j++)
+            edges.pb(mp(max(abs(pts[i].ff-pts[j].ff),abs(pts[i].ss-pts[j].ss)),mp(i,j)));
+    sort(edges.begin(), edges.end());
+    
+    u_init();
+    int cnt = pts.size(), i = 0, a, b;
+    while (cnt > 1){
+        auto x = edges[i++];
+        if (u_same(x.ss.ff, x.ss.ss)) continue;
+        u_join(x.ss.ff, x.ss.ss);
+        cnt--;
+        BACKBONE[pts[x.ss.ff].ff][pts[x.ss.ff].ss] = 0;
+        //~ ii x1 = q.front(), x2 = mp(-1,-1);
+        //~ if (!BACKBONE[x1.ff][x1.ss]){
+            //~ memset(BACKBONE_TMP, 0, sizeof BACKBONE_TMP);
+            //~ BACKBONE_TMP[x1.ff][x1.ss] = 1;
+            //~ while (!q.empty()){
+                //~ x1 = q.front();
+                //~ q.pop();
+                //~ for (int i = -1; i <= 1; i++)
+                    //~ for (int j = -1; j <= 1; j++)
+                        //~ if (x1.ff+i >= 0 && x1.ff+i < H && x1.ss+j >= 0 && x1.ss+j < W){
+                            //~ if (!BACKBONE_TMP[x1.ff+i][x1.ss+j]){
+                                //~ if (BACKBONE[x1.ff+i][x1.ss+j]){
+                                    //~ x2 = mp(x1.ff+i, x1.ss+j);
+                                    //~ break;
+                                //~ }
+                                //~ BACKBONE_TMP[x1.ff+i][x1.ss+j] = 1;
+                                //~ q.push(mp(x1.ff+i,x1.ss+j));
+                            //~ }
+                        //~ }
+                //~ if (x2.ff != -1)
+                    //~ break;
+            //~ }
+        //~ } else
+            //~ x2 = x.ss;
+        
+        a = pts[x.ss.ff].ff, b = pts[x.ss.ff].ss;
+        //~ queue<ii> new_back;
+        while (mp(a,b) != pts[x.ss.ss]){
+            BACKBONE[a][b] = 1;
+            //~ new_back.push(mp(a,b));
+            BACKBONE_COST[a][b] = 0;
+            if (a > pts[x.ss.ss].ff) a--;
+            if (a < pts[x.ss.ss].ff) a++;
+            if (b > pts[x.ss.ss].ss) b--;
+            if (b < pts[x.ss.ss].ss) b++;
+        }
+    }
+    int backcnt = -1, rtrcnt = 0;
+    for (int i = 0; i < H; i++)
+        for (int j = 0; j < W; j++){
+            if (!ROUTER[i][j]) continue;
+            rtrcnt++;
+    }
+    for (int i = 0; i < H; i++)
+        for (int j = 0; j < W; j++)
+            if (BACKBONE[i][j]) backcnt++;
+    BB = B - (rtrcnt * C_R + backcnt * C_B);
+    
+    calc_backcost();
 }
 int main(int argc, char *argv[]){
     int seed = time(NULL);
@@ -203,7 +304,6 @@ int main(int argc, char *argv[]){
     freopen(FILE_IN.c_str(),"r",stdin);
     
     int a,b,c;
-    int backinit[2];
     
     scanf("%d%d%d", &H, &W, &R);
     scanf("%d%d%d", &a, &b, &c); // just trust me
@@ -228,9 +328,13 @@ int main(int argc, char *argv[]){
     calc_backcost();
     calc_champions();
     
+    int back_cnt_ref = 0;
     while (true){
-        //~ deb++;
-        //~ if (deb > 100) break;
+        back_cnt_ref++;
+        if (back_cnt_ref > 5){
+            fix_backbone();
+            back_cnt_ref = 0;
+        }
         
         auto x = calc_scores();
         //~ cout<<x.ff<<":"<<x.ss.ff<<","<<x.ss.ss<<endl;
@@ -300,26 +404,20 @@ int main(int argc, char *argv[]){
             //~ edge.pb(mp(max(abs(pts[i].ff-pts[j].ff), abs(pts[i].ss-pts[j].ss)),mp(i,j)));
     //~ sort(edge.begin(), edge.end());
     
+    fix_backbone();
+    
     int backcnt = -1, rtrcnt = 0;
-    for (int i = 0; i < H; i++)
-        for (int j = 0; j < W; j++)
-            //~ BACKBONE[i][j] = 0;
-            if (BACKBONE[i][j]) backcnt++;
     
     for (int i = 0; i < H; i++)
         for (int j = 0; j < W; j++){
             if (!ROUTER[i][j]) continue;
             rtrcnt++;
-            //~ a = i, b = j;
-            //~ while (!BACKBONE[a][b]){
-                //~ backcnt++;
-                //~ BACKBONE[a][b] = 1;
-                //~ if (a > backinit[0]) a--;
-                //~ if (a < backinit[0]) a++;
-                //~ if (b > backinit[1]) b--;
-                //~ if (b < backinit[1]) b++;
-            //~ }
     }
+    
+    for (int i = 0; i < H; i++)
+        for (int j = 0; j < W; j++)
+            if (BACKBONE[i][j]) backcnt++;
+            
     //~ for (int i = 0; i < H; i++){
         //~ for (int j = 0; j < W; j++)
             //~ cout<<BACKBONE[i][j];

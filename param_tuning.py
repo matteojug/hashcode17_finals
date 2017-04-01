@@ -33,7 +33,7 @@ def exec_with_params(params):
 def random_params():
     while True:
         a = []
-        a.append(1)
+        a.append(3)
         #~ a.append(random.randint(0, 100))
         yield a
 
@@ -46,7 +46,7 @@ iterator = random_params()
 best_score = -1
 best_file = 0
 
-max_iterations = 10 #-1 means all combinations
+max_iterations = 100 #-1 means all combinations
 import time
 
 for i, combination in enumerate(iterator):
