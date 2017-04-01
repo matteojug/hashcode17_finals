@@ -57,7 +57,7 @@ ll SCORES[MAXN][MAXN];
 
 int backinit[2];
     
-int DELTA_SKIP = 1;
+int DELTA_SKIP = 10;
 
 int u_P[MAXN], u_R[MAXN];
 void u_init(){
@@ -121,8 +121,7 @@ void calc_champions(){
                         if (!theres_a_wall(min(ic+a,ic),min(jc+b,jc),max(ic+a,ic),max(jc+b,jc)))
                             score += 1000;
                     }
-            if (BB-(BACKBONE_COST[ic][jc]*C_B+C_R) < 0) continue;
-            score-=BACKBONE_COST[ic][jc]*C_B+C_R;
+            //~ score -= BACKBONE_COST[ic][jc]*C_B+C_R;
             SCORES[ic][jc] = score;
         }
     for (int i = 0; i < H; i+=DELTA_SKIP)
@@ -137,7 +136,7 @@ void calc_champions(){
 }
 
 pair<ll, ii> calc_scores(){
-    ll best = -B;
+    ll best = -B;//mp(-B, -B);
     vii besters;
     besters.pb(mp(0,0));
     for (int i = 0; i < H; i+=DELTA_SKIP)
@@ -153,18 +152,19 @@ pair<ll, ii> calc_scores(){
                     if (ic+a >= 0 && ic+a < H && jc+b >= 0 && jc+b < W){
                         if (COVERED[ic+a][jc+b] || PLANE[ic+a][b+jc] != '.') continue;
                         if (!theres_a_wall(min(ic+a,ic),min(jc+b,jc),max(ic+a,ic),max(jc+b,jc)))
-                            score += 1000 * 3;
+                            score += 1000;
                     }
             if (BB-(BACKBONE_COST[ic][jc]*C_B+C_R) < 0) continue;
-            score-=BACKBONE_COST[ic][jc]*C_B+C_R;
+            //~ score -= BACKBONE_COST[ic][jc]*C_B * 10;
             if (score > best){
                 besters.clear();
                 besters.pb(mp(ic,jc));
                 best = score;
+                
             } else if (score == best)
                 besters.pb(mp(ic,jc));
         }
-    return mp(best, besters[0]);
+    //~ return mp(best, besters[0]);
     return mp(best, besters[rand()%besters.size()]);
 }
 void fix_backbone(){
@@ -331,14 +331,14 @@ int main(int argc, char *argv[]){
     int back_cnt_ref = 0;
     while (true){
         back_cnt_ref++;
-        if (back_cnt_ref > 5){
+        if (back_cnt_ref > 10 && BB > 1000){
             fix_backbone();
             back_cnt_ref = 0;
         }
         
         auto x = calc_scores();
         //~ cout<<x.ff<<":"<<x.ss.ff<<","<<x.ss.ss<<endl;
-        if (x.ff <= 0) break;
+        if (BACKBONE_COST[x.ss.ff][x.ss.ss]*C_B+C_R <= 0) break;
         
         BB -= BACKBONE_COST[x.ss.ff][x.ss.ss]*C_B+C_R;
         if (BB < 0) break;
@@ -404,7 +404,7 @@ int main(int argc, char *argv[]){
             //~ edge.pb(mp(max(abs(pts[i].ff-pts[j].ff), abs(pts[i].ss-pts[j].ss)),mp(i,j)));
     //~ sort(edge.begin(), edge.end());
     
-    fix_backbone();
+    //~ fix_backbone();
     
     int backcnt = -1, rtrcnt = 0;
     
