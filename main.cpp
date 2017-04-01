@@ -57,7 +57,7 @@ ll SCORES[MAXN][MAXN];
 
 int backinit[2];
     
-int DELTA_SKIP = 5;
+int DELTA_SKIP = 1;
 
 int u_P[MAXN], u_R[MAXN];
 void u_init(){
@@ -153,7 +153,7 @@ pair<ll, ii> calc_scores(){
                     if (ic+a >= 0 && ic+a < H && jc+b >= 0 && jc+b < W){
                         if (COVERED[ic+a][jc+b] || PLANE[ic+a][b+jc] != '.') continue;
                         if (!theres_a_wall(min(ic+a,ic),min(jc+b,jc),max(ic+a,ic),max(jc+b,jc)))
-                            score += 1000;
+                            score += 1000 * 3;
                     }
             if (BB-(BACKBONE_COST[ic][jc]*C_B+C_R) < 0) continue;
             score-=BACKBONE_COST[ic][jc]*C_B+C_R;
@@ -164,8 +164,8 @@ pair<ll, ii> calc_scores(){
             } else if (score == best)
                 besters.pb(mp(ic,jc));
         }
+    return mp(best, besters[0]);
     return mp(best, besters[rand()%besters.size()]);
-    //~ return mp(best, besters[0]);
 }
 void fix_backbone(){
     vii pts;
