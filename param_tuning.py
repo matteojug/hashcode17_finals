@@ -47,6 +47,7 @@ best_score = -1
 best_file = 0
 
 max_iterations = 10 #-1 means all combinations
+import time
 
 for i, combination in enumerate(iterator):
     if max_iterations > 0 and i == max_iterations:
@@ -57,4 +58,5 @@ for i, combination in enumerate(iterator):
         best_score = val
         print("[NEW BEST] combination n. {}, that is {}, with score {}".format(i, combination, val))
         #now copy file
+        time.sleep(1)
         copyfile(filename, "{}.best".format(filename))
