@@ -34,13 +34,14 @@ typedef vector<ii> vii;
 #define mp make_pair
 #define pb push_back
 #define mt make_tuple
+#define tget(X,id) get<id>(X)
 
 #define MAXN 1000000
 
 string FILE_IN, FILE_OUT;
 
 int main(int argc, char *argv[]){
-    // Input stuff, you should run
+    // Input stuff, you should ignore this
     int INPUT_FILE = -1;
     if (argc == 1){
         cerr<<"No input specified, using input 1.\n FIY, you should run "<<argv[0]<<" [(1|2|3|4|input_name) [param1 [param2 ... ]]]"<<endl;
@@ -86,12 +87,13 @@ int main(int argc, char *argv[]){
             cerr<<"Look, i dunno how you get there, ask someone.";
             return 1;
     }
-    
+    // Parameter stuff, for tuning
     int param = 0;
     if (argc >= 3) param = atoi(argv[2]);
     
     cout<<"Got parameter "<<param<<endl;
     
+    // Actual code
     freopen(FILE_IN.c_str(),"r",stdin);
     
     cout<<"Here do the magic"<<endl;
@@ -105,7 +107,8 @@ int main(int argc, char *argv[]){
     v.pb(mt(2,-1,"jbfkjbgs"));
     sort(v.begin(), v.end());
     for (auto x : v)
-        cout<<get<0>(x)<<","<<get<1>(x)<<","<<get<2>(x)<<endl;
+        //~ cout<<get<0>(x)<<","<<get<1>(x)<<","<<get<2>(x)<<endl;
+        cout<<tget(x,0)<<","<<tget(x,1)<<","<<tget(x,2)<<endl;
         
     bitset<10> bs;
     bs[0] = 1;
@@ -116,6 +119,7 @@ int main(int argc, char *argv[]){
     cout<<"Now i'll print the score (a+param**2) and the fileout"<<endl;
     cout<<FILE_OUT<<" "<<a+param*param<<endl;
     
+    // Solution printing
     freopen(FILE_OUT.c_str(),"w",stdout);
     cout<<"Here print the solution"<<endl;
     return 0;

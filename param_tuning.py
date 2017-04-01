@@ -39,14 +39,15 @@ def random_params():
 
 #OPT2: WRITE HERE THE DOMAINS OF THE VARIABLES YOU WANT TO TEST
 domains = [
-    [5],
-    [5]
+    [1,2],
+    [3,4],
+    [5,6]
 ]
 
 # CHOOSE
-# iterator = product(*domains)
+iterator = product(*domains)
 
-iterator = random_params()
+#~ iterator = random_params()
 
 #let's try the combinations
 best_score = -1
@@ -55,7 +56,7 @@ best_file = 0
 max_iterations = 10 #-1 means all combinations
 
 for i, combination in enumerate(iterator):
-    if max_iterations >= 0 and i == max_iterations:
+    if max_iterations > 0 and i == max_iterations:
         break
     filename, val = exec_with_params(combination)
     print("trying combination n. {}, that is {}, resulted in score {}".format(i, combination, val))
