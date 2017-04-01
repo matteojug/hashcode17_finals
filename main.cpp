@@ -43,6 +43,7 @@ string FILE_IN, FILE_OUT;
 int H, W, R;
 long long C_B, C_R, B, BB;
 char PLANE[MAXN][MAXN];
+char PLANE_TMP[MAXN][MAXN];
 int PLANE_WALL[MAXN][MAXN];
 bool BACKBONE[MAXN][MAXN];
 bool BACKBONE_TMP[MAXN][MAXN];
@@ -50,15 +51,9 @@ int BACKBONE_COST[MAXN][MAXN];
 bool COVERED[MAXN][MAXN];
 bool ROUTER[MAXN][MAXN];
 
-void calc_backcost(){
-    queue<ii> q;
-    for (int i = 0; i < H; i++)
-        for (int j = 0; j < W; j++){
-            if (BACKBONE[i][j])
-                q.push(mp(i,j)), BACKBONE_COST[i][j] = 0;
-            else
-                BACKBONE_COST[i][j] = B+1;
-        }
+int DELTA_SKIP = 1;
+
+void quick_calc_backcost(queue<ii> &q){
     while (!q.empty()){
         auto x = q.front(); q.pop();
         for (int i = -1; i <= 1; i++)
@@ -70,6 +65,19 @@ void calc_backcost(){
                 }
     }
 }
+
+void calc_backcost(){
+    queue<ii> q;
+    for (int i = 0; i < H; i++)
+        for (int j = 0; j < W; j++){
+            if (BACKBONE[i][j])
+                q.push(mp(i,j)), BACKBONE_COST[i][j] = 0;
+            else
+                BACKBONE_COST[i][j] = B+1;
+        }
+    quick_calc_backcost(q);
+}
+
 int theres_a_wall(int a, int b, int c, int d){
     return PLANE_WALL[c][d]-(a>0?PLANE_WALL[a-1][d]:0)-(b>0?PLANE_WALL[c][b-1]:0)+(a>0&&b>0?PLANE_WALL[a-1][b-1]:0);
 }
@@ -77,8 +85,8 @@ priority_queue<pair<ll, ii> > pq;
 void calc_scores(){
     while (!pq.empty()) pq.pop();
     pair<ll, ii> best = mp(-B, mp(0,0));
-    for (int i = 0; i < H; i++)
-        for (int j = 0; j < W; j++){
+    for (int i = 0; i < H; i+=DELTA_SKIP)
+        for (int j = 0; j < W; j+=DELTA_SKIP){
             if (ROUTER[i][j] || PLANE[i][j] == '#') continue;
             ll score = 0;
             for (int a = -R; a <= R; a++)
@@ -89,7 +97,7 @@ void calc_scores(){
                             score += 1000;
                     }
             if (BB-(BACKBONE_COST[i][j]*C_B+C_R) < 0) continue;
-            if (score > best.ff)
+            if (score-(BACKBONE_COST[i][j]*C_B+C_R) > best.ff)
                 best = mp(score-(BACKBONE_COST[i][j]*C_B+C_R),mp(i,j));
             //~ pq.push(mp(score-(BACKBONE_COST[i][j]*C_B+C_R),mp(i,j)));
         }
@@ -171,8 +179,8 @@ int main(int argc, char *argv[]){
     
     ll ANS = 0;
     
+    calc_backcost();
     while (true){
-        calc_backcost();
         calc_scores();
         auto x = pq.top(); pq.pop();
         BB -= BACKBONE_COST[x.ss.ff][x.ss.ss]*C_B+C_R;
@@ -214,13 +222,17 @@ int main(int argc, char *argv[]){
         } else
             x2 = x.ss;
         a = x.ss.ff, b = x.ss.ss;
+        queue<ii> new_back;
         while (!BACKBONE[a][b]){
             BACKBONE[a][b] = 1;
+            new_back.push(mp(a,b));
+            BACKBONE_COST[a][b] = 0;
             if (a > x2.ff) a--;
             if (a < x2.ff) a++;
             if (b > x2.ss) b--;
             if (b < x2.ss) b++;
         }
+        quick_calc_backcost(new_back);
     }
     
     //~ vii pts;
@@ -254,11 +266,11 @@ int main(int argc, char *argv[]){
                 //~ if (b < backinit[1]) b++;
             //~ }
     }
-    for (int i = 0; i < H; i++){
-        for (int j = 0; j < W; j++)
-            cout<<BACKBONE[i][j];
-        cout<<endl;
-    }
+    //~ for (int i = 0; i < H; i++){
+        //~ for (int j = 0; j < W; j++)
+            //~ cout<<BACKBONE[i][j];
+        //~ cout<<endl;
+    //~ }
     BACKBONE[backinit[0]][backinit[1]] = 0;
     
     cout<<"ANS:"<<ANS<<endl;
@@ -272,6 +284,15 @@ int main(int argc, char *argv[]){
     
     //~ cout<<"Now i'll print the score (a+param**2) and the fileout"<<endl;
     //~ cout<<FILE_OUT<<" "<<a+param*param<<endl;
+    
+    //~ freopen("debug.txt","w",stdout);
+    //~ memcpy(PLANE_TMP, PLANE, sizeof PLANE);
+    //~ for (int i = 0; i < H; i++)
+        //~ for (int j = 0; j < W; j++){
+            //~ if (BACKBONE[i][j]) PLANE_TMP[i][j] = '*';
+            //~ if (ROUTER[i][j]) PLANE_TMP[i][j] = 'O';
+        //~ }
+    //~ PLANE_TMP[backinit[0]][backinit[1]] = 'X';
     
     // Solution printing
     freopen(FILE_OUT.c_str(),"w",stdout);
