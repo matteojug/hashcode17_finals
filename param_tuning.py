@@ -33,12 +33,18 @@ def exec_with_params(params):
 def random_params():
     while True:
         a = []
-        a.append(3)
-        #~ a.append(random.randint(0, 100))
+        a.append(2)
+        a.append(random.randint(0, 10))
+        a.append(random.randint(0, 10))
+        a.append(0)
+        a.append(0)
+        a.append(random.randint(-10, 0))
+        a.append(random.randint(0, 10))
         yield a
 
 # CHOOSE
-#~ iterator = product(*domains)
+domains = [[3],range(1,6),range(1,6)]
+iterator = product(*domains)
 
 iterator = random_params()
 
@@ -49,14 +55,37 @@ best_file = 0
 max_iterations = 100 #-1 means all combinations
 import time
 
+#~ curr_combination = [random.randint(-1,1) for i in xrange(7)]
+#~ curr_combination[0] = 1
+
+#~ delta = 3
+#~ # random climbing
+#~ for i in xrange(max_iterations):
+    #~ print "[{}] Base: {}".format(i, curr_combination)
+    #~ combination = curr_combination[:]
+    #~ idx = random.randint(1,6)
+    #~ combination[idx] -= delta/2
+    #~ res = []
+    #~ for j in xrange(delta):
+        #~ filename, val = exec_with_params(combination)
+        #~ print("[{}:{}] Params: {} => {} (vs best {})".format(i, j, combination, val, best_score))
+        #~ if val > best_score:
+            #~ best_score = val
+            #~ curr_combination = combination[:]
+            #~ print("[NEW BEST] {} => {}".format(combination, val))
+            #~ #now copy file
+            #~ time.sleep(1)
+            #~ copyfile(filename, "{}.best".format(filename))
+        #~ combination[idx] += 1
+
 for i, combination in enumerate(iterator):
-    if max_iterations > 0 and i == max_iterations:
+    if i == max_iterations:
         break
     filename, val = exec_with_params(combination)
-    print("trying combination n. {}, that is {}, resulted in score {}".format(i, combination, val))
+    print("[{}] Params: {} => {} (vs best {})".format(i, combination, val, best_score))
     if val > best_score:
         best_score = val
-        print("[NEW BEST] combination n. {}, that is {}, with score {}".format(i, combination, val))
+        print("[NEW BEST] {} => {}".format(combination, val))
         #now copy file
         time.sleep(1)
         copyfile(filename, "{}.best".format(filename))

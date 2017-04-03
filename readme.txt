@@ -1,17 +1,6 @@
 Foo 
 
-
-vector<tuple<int, int, string> > v;
-v.pb(mt(1,2,"pippo"));
-v.pb(mt(4,6,"pappa"));
-v.pb(mt(2,-1,"jbfkjbgs"));
-sort(v.begin(), v.end());
-for (auto x : v)
-    //~ cout<<get<0>(x)<<","<<get<1>(x)<<","<<get<2>(x)<<endl;
-    cout<<tget(x,0)<<","<<tget(x,1)<<","<<tget(x,2)<<endl;
-    
-bitset<10> bs;
-bs[0] = 1;
-bs[2] = 1;
-bs[9] = 1;
-cout<<bs.to_string()<<endl;
+1: [NEW BEST] [1, 7, 8, 0, 0, -8, 7] => 21963032
+2: [NEW BEST] (2, 1, 15) => 290221762
+3: [NEW BEST] [3, 10, 8, 0, 0, 0, 9] => 173359089
+4: [NEW BEST] [4, 10, 9, 0, 0, -2, 5] => 58740019
